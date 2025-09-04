@@ -28,8 +28,14 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler(ResourceNotFoundException.class)
 	public ResponseEntity<ApiResponse<?>> handleResourceNotFound(ResourceNotFoundException ex) {
 		log.error(ex.getMessage());
-		ApiResponse<?> errordetails = new ApiResponse(false, ex.getMessage());
+		ApiResponse<?> errordetails = new ApiResponse<>(false, ex.getMessage());
 		return new ResponseEntity<>(errordetails, HttpStatus.NOT_FOUND);
+	}
+	@ExceptionHandler(IllegalArgumentException.class)
+	public ResponseEntity<ApiResponse<?>> handleIllegalArgument(IllegalArgumentException ex) {
+		log.error(ex.getMessage());
+		ApiResponse<?> errordetails = new ApiResponse<>(false, ex.getMessage());
+		return new ResponseEntity<>(errordetails, HttpStatus.OK);
 	}
 
 	@ExceptionHandler(HttpMessageNotReadableException.class)
@@ -48,15 +54,13 @@ public class GlobalExceptionHandler {
                 errorMessage = "Invalid date format. Please use ISO format (yyyy-MM-dd)";
             }
         }
-        // Handle specific date parsing errors
         else if (ex.getCause() instanceof DateTimeParseException) {
             errorMessage = "Invalid date format. Please use ISO format (yyyy-MM-dd)";
         }
-        // Generic JSON parse errors
         else if (ex.getMessage() != null && ex.getMessage().startsWith("JSON parse error")) {
             errorMessage = "Malformed JSON request";
         }
-		ApiResponse<?> errorDetails = new ApiResponse(false,errorMessage);
+		ApiResponse<?> errorDetails = new ApiResponse<>(false,errorMessage);
 
 		
 //		String allowedStatuses = Arrays.stream(Role.values()).map(Enum::name).collect(Collectors.joining(", "));
@@ -85,14 +89,14 @@ public class GlobalExceptionHandler {
 		Map<String, String> errors = ex.getBindingResult().getFieldErrors().stream().collect(Collectors
 				.toMap(err -> err.getField(), err -> err.getDefaultMessage(), (existing, replacement) -> existing));
 
-		ApiResponse<?> errordetails = new ApiResponse(false, errors);
+		ApiResponse<?> errordetails = new ApiResponse<>(false, errors);
 		return new ResponseEntity<>(errordetails, HttpStatus.BAD_REQUEST);
 	}
 
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<?> handleGlobalExc(Exception e) {
 		log.error(e.getMessage());
-		ApiResponse<?> errordetails = new ApiResponse(false, e.getMessage());
+		ApiResponse<?> errordetails = new ApiResponse<>(false, e.getMessage());
 		return new ResponseEntity<>(errordetails, HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 }

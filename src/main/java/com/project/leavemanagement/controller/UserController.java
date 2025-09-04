@@ -24,6 +24,7 @@ import com.project.leavemanagement.enums.Status;
 import com.project.leavemanagement.service.LeaveService;
 import com.project.leavemanagement.service.UserService;
 
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 
 @RestController
@@ -37,18 +38,20 @@ public class UserController {
 	
     private static final Logger log = LoggerFactory.getLogger(UserController.class);
 
-
+	@Operation(summary = "Create User", description = "Admin can create Employee/Manager")
 	@PostMapping
 	public ResponseEntity<?> createUser(@Valid @RequestBody UserRequest dto) {
 		log.debug("Admin Requested for creating User :{}",dto);
 		log.info("Admin Requested to create user : {} with Role : {}",dto.getUserName(),dto.getRole());
 		return new ResponseEntity<>(new ApiResponse<>(true, us.createUser(dto)),HttpStatus.CREATED);
 	}
+	@Operation(summary = "Update User", description = "Update user by id")
 	@PutMapping("/{id}")
 	public ResponseEntity<?> updateUser(@PathVariable int id ,@Valid @RequestBody UserRequest dto) {
 		log.info("Admin Requesedt for Update user : {}",dto.getUserName());
 		return new ResponseEntity<>(new ApiResponse<>(true,us.updateUser(id,dto)),HttpStatus.ACCEPTED);
 	}
+	@Operation(summary = "Get All Users", description = "Fetch all users details")
 	@GetMapping
 	public ResponseEntity<?> getUsers(
 			@RequestParam(defaultValue = "0",required = false) int pageNo
@@ -58,10 +61,12 @@ public class UserController {
 			) {
 		return ResponseEntity.ok(new ApiResponse<>(true, us.getAllUsers(pageNo,pageSize,sortBy,sortDir)));
 	}
+	@Operation(summary = "Get User by ID", description = "Fetch user details by ID")
 	@GetMapping("/{id}")
 	public ResponseEntity<?> getById(@PathVariable int id) {
 		return ResponseEntity.ok(new ApiResponse<>(true,us.getUserById(id)));
 	}
+	@Operation(summary = "Delete Employee by ID", description = "delete employee details by ID")
 	@DeleteMapping("/{id}")
 	public ResponseEntity<?> deleteById(@PathVariable int id) {
 		log.info("Admin Requested for Deleting User with ID : {}",id);
@@ -69,6 +74,7 @@ public class UserController {
 		 log.info("User with ID : {} Deleted Successfully");
 		 return ResponseEntity.ok(new ApiResponse<>(true, "User Deleted Successfully!!"));
 	}
+	@Operation(summary = "Get All Leave Requests", description = "Fetch all employee leave requests. ")
 	@GetMapping("/leave")
 	public ResponseEntity<?> getUsersLeaves(
 			@RequestParam(defaultValue = "0",required = false) int pageNo
@@ -78,6 +84,7 @@ public class UserController {
 			) {
 		return ResponseEntity.ok(new ApiResponse<>(true, ls.getAllLeaves(pageNo,pageSize,sortBy,sortDir)));
 	}
+	@Operation(summary = "Search All Leave Requests", description = "Fetch and search all employee leave requests by uid,status,start/end Date,reason. ")
 	@GetMapping("/leave/search")
 	public ResponseEntity<?> searchLeaves(
 			@RequestParam(required = false) Integer uid,
@@ -92,6 +99,7 @@ public class UserController {
 			) {
 		return ResponseEntity.ok(new ApiResponse<>(true, ls.searchAplliedLeave(uid,status,startDate,endDate,reason,pageNo,pageSize,sortBy,sortDir)));
 	}
+	@Operation(summary = "Search All Users", description = "Fetch and search all users by name,email,role. ")
 	@GetMapping("/search")
     public ResponseEntity<?> searchUsers(
             @RequestParam(required = false) String username,

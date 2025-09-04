@@ -2,6 +2,7 @@ package com.project.leavemanagement.security;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
+import java.security.SignatureException;
 import java.util.Date;
 
 import javax.crypto.SecretKey;
@@ -44,13 +45,17 @@ public class JwtUtil {
                 .compact();
     }
 
-    public String extractUsername(String token) {
-        return Jwts.parser()
-                .verifyWith((SecretKey) key())
-                .build()
-                .parseSignedClaims(token)
-                .getPayload()
-                .getSubject();
+    public String extractUsername(String token) throws SignatureException {
+        try {
+			return Jwts.parser()
+			        .verifyWith((SecretKey) key())
+			        .build()
+			        .parseSignedClaims(token)
+			        .getPayload()
+			        .getSubject();
+		}catch (Exception e) {
+			throw e;
+		}
     }
 
     public boolean validateToken(String token){

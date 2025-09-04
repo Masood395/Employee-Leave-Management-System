@@ -25,6 +25,7 @@ import com.project.leavemanagement.enums.Status;
 import com.project.leavemanagement.repository.UserRepo;
 import com.project.leavemanagement.service.LeaveService;
 
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 
 @RestController
@@ -44,12 +45,13 @@ public class LeaveController {
 	                 .orElseThrow(() -> new RuntimeException("User not found"));
 	}
 
-
+	@Operation(summary = "Apply Leave Requests", description = "Employee can apply leave requests with proper reason. ")
 	@PostMapping
 	public ResponseEntity<?> applyLeave(@Valid @RequestBody EmployeeLeaveRequest leave) {
         log.info("User {} applying for leave from {} to {}", getLoggedInUser().getUserName(),leave.getStart_date(), leave.getEnd_date());
 		return new ResponseEntity<>(new ApiResponse<>(true, ls.applyLeave(leave)),HttpStatus.CREATED);
 	}
+	@Operation(summary = "Get All Leave Requests", description = "Fetch all particular employee leave requests. ")
 	@GetMapping
 	public ResponseEntity<?> getMyLeaves(
 			@RequestParam(defaultValue = "0",required = false) int pageNo
@@ -59,6 +61,7 @@ public class LeaveController {
 			) {
 		return ResponseEntity.ok(new ApiResponse<>(true, ls.getAplliedLeave(pageNo,pageSize,sortBy,sortDir)));
 	}
+	@Operation(summary = "Get Leave Requests of Employee", description = "Fetch all employee leave requests working under particular manager. ")
 	@GetMapping("/{status}")
 	public ResponseEntity<?> getPendingLeaves(@PathVariable String status,
 			@RequestParam(defaultValue = "0",required = false) int pageNo
@@ -68,13 +71,13 @@ public class LeaveController {
 			) {
 		return ResponseEntity.ok(new ApiResponse<>(true, ls.getPendings(status,pageNo,pageSize,sortBy,sortDir)));
 	}
-	
+	@Operation(summary = "Accept/Reject Leave Request", description = "manager can accept/reject the employees leaves working under him. ")
 	@PutMapping("/action/{id}")
 	public ResponseEntity<?>  managerAction(@PathVariable int id,@RequestBody Action action) {
         log.info("Manager {} {} leave id={}", getLoggedInUser().getUserName(), action, id);
 		return new ResponseEntity<>(new ApiResponse<>(true, ls.managerAction(id,action)),HttpStatus.ACCEPTED);
 	}
-	
+	@Operation(summary = "Search All Leave Requests", description = "Fetch and search all leave requests.")
 	@GetMapping("/search")
 	public ResponseEntity<?> searchLeaves(
 			@RequestParam(required = false) Integer id,

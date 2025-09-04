@@ -12,6 +12,7 @@ import org.springframework.data.repository.query.Param;
 import com.project.leavemanagement.entity.User;
 import com.project.leavemanagement.enums.Role;
 
+
 public interface UserRepo extends JpaRepository<User, Integer> {
 
 	Optional<User> findByEmail(String email);

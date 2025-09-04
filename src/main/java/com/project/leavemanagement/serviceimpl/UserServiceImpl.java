@@ -13,11 +13,9 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.project.leavemanagement.dto.EmployeeLeaveResponse;
 import com.project.leavemanagement.dto.PagedResponse;
 import com.project.leavemanagement.dto.UserRequest;
 import com.project.leavemanagement.dto.UserResponse;
-import com.project.leavemanagement.entity.LeaveRequest;
 import com.project.leavemanagement.entity.User;
 import com.project.leavemanagement.enums.Role;
 import com.project.leavemanagement.exception.ResourceNotFoundException;
@@ -41,12 +39,16 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public UserResponse createUser(UserRequest dto) {
-		if(dto.getRole().equals(Role.ADMIN)) {log.warn("Admin Cant create a new Admin!!");;throw new RuntimeException("You can only ADD Employee and Manager ");}
+		if (dto.getRole().equals(Role.ADMIN)) {
+			log.warn("Admin Cant create a new Admin!!");
+			throw new RuntimeException("You can only ADD Employee and Manager ");
+		}
 		String trim = dto.getUserName().trim();
 		if(trim.length()<5) {
 			throw new IllegalArgumentException("Name should be between 5-20 character");
 		}
 		dto.setUserName(trim);
+		dto.setEmail(dto.getEmail().toLowerCase());
 		if (ur.findByEmail(dto.getEmail()).orElse(null) != null) {
 			log.warn("User with this Email : " + dto.getEmail() + " Already Exist...");
 			throw new IllegalArgumentException("User with this Email : " + dto.getEmail() + " Already Exist...");
@@ -106,7 +108,7 @@ public class UserServiceImpl implements UserService {
 		if(dto.getEmail()!=null) {user.setEmail(dto.getEmail());}
 		if(dto.getPassword()!=null) {user.setPassword(passwordEncoder.encode(dto.getPassword()));}
 		if(dto.getRole()!=null) {user.setRole(dto.getRole());}
-		if (manager.getUserId() == id) {
+		if (manager!=null&&manager.getUserId() == id) {
 			if (dto.getRole().equals(Role.EMPLOYEE)) {
 				throw new IllegalArgumentException("Manager with ID " + dto.getManagerId() + " Not Available!!");
 			}
@@ -139,6 +141,9 @@ public class UserServiceImpl implements UserService {
 		User user = ur.findById(id).orElseThrow(
 				()-> new ResourceNotFoundException("User with ID "+id+" Not Available!!"));	
 		if(user.getRole().equals(Role.ADMIN)) {throw new IllegalArgumentException("Can't Delete ADMIN!!!");}
+		if(user.getRole().equals(Role.MANAGER)) {
+			if(!ur.findByManager(user).isEmpty()) {throw new IllegalArgumentException("Re-Assign the Employees Working under this Manager!! ");}
+		}
 		ur.delete(user);
 	}
 	

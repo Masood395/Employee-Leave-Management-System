@@ -3,6 +3,7 @@ package com.project.leavemanagement.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -24,12 +25,12 @@ import io.swagger.v3.oas.annotations.security.SecurityScheme;
 
 @Configuration
 @EnableWebSecurity
+@EnableAsync
 @OpenAPIDefinition(info = @Info(title = "Employee Leave Management System API", version = "1.0"), security = {
-		@SecurityRequirement(name = "bearerAuth") } 
-)
-@SecurityScheme(name = "bearerAuth", scheme = "bearer", type = SecuritySchemeType.HTTP, bearerFormat = "JWT"
-)
+		@SecurityRequirement(name = "bearerAuth") })
+@SecurityScheme(name = "bearerAuth", scheme = "bearer", type = SecuritySchemeType.HTTP, bearerFormat = "JWT")
 public class SecurityConfig {
+	
 	@Autowired
 	private JwtAuthenticationFilter jwtAuthFilter;
 
@@ -42,7 +43,7 @@ public class SecurityConfig {
 		                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**","/swagger-ui.html").permitAll()
 		                .requestMatchers("/api/admin/**").hasRole("ADMIN")
 		                .requestMatchers("/api/leave","/api/leave/search").hasRole("EMPLOYEE")
-		                .requestMatchers("/api/leave/pending","/api/leave/action/{id}").hasRole("MANAGER")
+		                .requestMatchers("/api/leave/pending","/api/leave/action/*").hasRole("MANAGER")
 		                .anyRequest().authenticated())
 				.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
 				.sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS));

@@ -1,6 +1,7 @@
 package com.project.leavemanagement.security;
 
 import java.io.IOException;
+import java.security.SignatureException;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -60,7 +61,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 Optional<AuthToken> tokenEntityOpt = authTokenRepo.findByAccessToken(jwt);
                 if (tokenEntityOpt.isEmpty()) {
                     writeResponse(response, new ResponseEntity<>(
-                            new ApiResponse(false, "Access token not recognized"), HttpStatus.UNAUTHORIZED));
+                            new ApiResponse<>(false, "Access token not recognized"), HttpStatus.UNAUTHORIZED));
                     return;
                 }
 
@@ -68,12 +69,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 if (tokenEntity.isAccessTokenRevoked()) {
                     writeResponse(response, new ResponseEntity<>(
-                            new ApiResponse(false, "Access token revoked"), HttpStatus.UNAUTHORIZED));
+                            new ApiResponse<>(false, "Access token revoked"), HttpStatus.UNAUTHORIZED));
                     return;
                 }
                 if (tokenEntity.getAccessTokenExpiry().isBefore(LocalDateTime.now())) {
                     writeResponse(response, new ResponseEntity<>(
-                            new ApiResponse(false, "Access token expired"), HttpStatus.UNAUTHORIZED));
+                            new ApiResponse<>(false, "Access token expired"), HttpStatus.UNAUTHORIZED));
                     return;
                 }
 
@@ -91,19 +92,23 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
             filterChain.doFilter(request, response);
 
-        } catch (ExpiredJwtException e) {
+        } 
+        catch (ExpiredJwtException e) {
             writeResponse(response, new ResponseEntity<>(
-                    new ApiResponse(false, "JWT token expired"), HttpStatus.UNAUTHORIZED));
+                    new ApiResponse<>(false, "JWT token expired"), HttpStatus.UNAUTHORIZED));
         } catch (MalformedJwtException e) {
             writeResponse(response, new ResponseEntity<>(
-                    new ApiResponse(false, "Invalid JWT token"), HttpStatus.UNAUTHORIZED));
+                    new ApiResponse<>(false, "Invalid JWT token"), HttpStatus.UNAUTHORIZED));
         } catch (IllegalArgumentException e) {
             writeResponse(response, new ResponseEntity<>(
-                    new ApiResponse(false, "JWT claims string is empty"), HttpStatus.BAD_REQUEST));
+                    new ApiResponse<>(false, "JWT claims string is empty"), HttpStatus.BAD_REQUEST));
+        } catch (SignatureException e) {
+        	writeResponse(response, new ResponseEntity<>(
+        			new ApiResponse<>(false, "Invalid JWT token"), HttpStatus.UNAUTHORIZED));
         }
     }
 
-    private void writeResponse(HttpServletResponse response, ResponseEntity<ApiResponse> entity) throws IOException {
+    private void writeResponse(HttpServletResponse response, ResponseEntity<ApiResponse<?>> entity) throws IOException {
         response.setStatus(entity.getStatusCodeValue());
         response.setContentType("application/json");
 

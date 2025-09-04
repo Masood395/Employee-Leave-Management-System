@@ -21,7 +21,7 @@ public class DataInitializer {
                 admin.setPassword(passwordEncoder.encode("admin@123")); // encode password!
                 admin.setRole(Role.ADMIN);
                 userRepo.save(admin);
-                System.out.println("✅ Default admin created: admin@example.com / Admin@123");
+                System.out.println("✅ Default admin created: admin@example.com / admin@123");
             }
         };
     }

@@ -85,11 +85,10 @@ public class AuthServiceImpl implements AuthService {
 		var tokenEntity = atr.findByRefreshToken(refreshToken)
                 .orElseThrow(() -> new RuntimeException("Invalid refresh token"));
 
-        if (tokenEntity.isRefreshTokenRevoked()
-                || tokenEntity.getRefreshTokenExpiry().isBefore(LocalDateTime.now())) {
-        	log.warn("Refresh token expired or revoked");
-            throw new RuntimeException("Refresh token expired or revoked");
-        }
+		if (tokenEntity.isRefreshTokenRevoked() || tokenEntity.getRefreshTokenExpiry().isBefore(LocalDateTime.now())) {
+			log.warn("Refresh token expired or revoked");
+			throw new RuntimeException("Refresh token expired or revoked");
+		}
 
         User user = tokenEntity.getUser();
         

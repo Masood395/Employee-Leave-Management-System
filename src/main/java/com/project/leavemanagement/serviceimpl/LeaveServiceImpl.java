@@ -1,4 +1,4 @@
-package com.project.leavemanagement.service;
+package com.project.leavemanagement.serviceimpl;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -29,6 +29,9 @@ import com.project.leavemanagement.enums.Status;
 import com.project.leavemanagement.exception.ResourceNotFoundException;
 import com.project.leavemanagement.repository.LeaveRequestRepo;
 import com.project.leavemanagement.repository.UserRepo;
+import com.project.leavemanagement.service.EmailService;
+import com.project.leavemanagement.service.LeaveService;
+
 import org.springframework.security.access.AccessDeniedException;
 
 @Service
@@ -143,10 +146,10 @@ public class LeaveServiceImpl implements LeaveService {
 		if(action.getAction().equals(Status.PENDING)) {throw new IllegalArgumentException ("Invalid Action !!");}
 		LeaveRequest leave = lr.findById(id).orElseThrow(()->new ResourceNotFoundException("Leave Request with Id "+id+" Not Available"));
 		
-//		if(!ur.findById(mid).get().getRole().equals(Role.MANAGER)) {
-//			throw new IllegalArgumentException("Access Denied!! : Your not a Manager..");
-//		}
 		User manager = getLoggedInUser();
+		if(!manager.getRole().equals(Role.MANAGER)) {
+			throw new IllegalArgumentException("Access Denied!! : Your not a Manager..");
+		}
 		int mid=manager.getUserId();
 		
 		

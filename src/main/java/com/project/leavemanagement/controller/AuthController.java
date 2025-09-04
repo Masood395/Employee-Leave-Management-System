@@ -15,6 +15,7 @@ import com.project.leavemanagement.dto.AuthRequest;
 import com.project.leavemanagement.dto.AuthResponse;
 import com.project.leavemanagement.service.AuthService;
 
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 
 @RestController
@@ -26,7 +27,7 @@ public class AuthController {
 
     private static final Logger log = LoggerFactory.getLogger(AuthController.class);
 
-
+	@Operation(summary = "User Login", description = "user have to give correct credentials. ")
     @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody AuthRequest loginRequest) {
         log.info("Login attempt for user {}", loginRequest.getEmail());
@@ -34,18 +35,18 @@ public class AuthController {
         log.info("User {} logged in successfully", loginRequest.getEmail());
         return ResponseEntity.ok(new ApiResponse<>(true,response));
     }
-    
+	@Operation(summary = "Re-Generate Access Token", description = "using valid request token user can generate access token. ")
     @PostMapping("/refresh")
     public ResponseEntity<?> getAccessToken(@RequestParam String refreshToken) {
         log.info("Request for re-generating Access Token");
     	return ResponseEntity.ok(new ApiResponse<>(true,authService.getAccessToken(refreshToken)));
     }
-    
+	@Operation(summary = "Logout User", description = "logout. ")
     @PostMapping("/logout")
     public ResponseEntity<?> logOutUser() {
         log.info("Logout requested");
     	authService.loggedOut();
-        log.info("User Loged-out successfully.");
-    	return ResponseEntity.ok(new ApiResponse<>(true,"Logged-Out"));
+        log.info(" User Loged-out successfully.");
+    	return ResponseEntity.ok(new ApiResponse<>(true,"✅ Logged-Out"));
     }
 }
