@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.project.leavemanagement.dto.ApiResponse;
@@ -91,6 +92,12 @@ public class GlobalExceptionHandler {
 
 		ApiResponse<?> errordetails = new ApiResponse<>(false, errors);
 		return new ResponseEntity<>(errordetails, HttpStatus.BAD_REQUEST);
+	}
+
+	@ExceptionHandler(NoResourceFoundException.class)
+	public ResponseEntity<?> handleNoResourceFound(NoResourceFoundException ex) {
+		ApiResponse<?> errordetails = new ApiResponse<>(false, "The requested endpoint does not exist");
+		return new ResponseEntity<>(errordetails, HttpStatus.NOT_FOUND);
 	}
 
 	@ExceptionHandler(Exception.class)

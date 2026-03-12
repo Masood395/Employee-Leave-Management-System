@@ -14,6 +14,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import com.project.leavemanagement.security.CustomAccessDeniedHandler;
+import com.project.leavemanagement.security.CustomAuthenticationEntryPoint;
 import com.project.leavemanagement.security.JwtAuthenticationFilter;
 
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
@@ -30,9 +32,13 @@ import io.swagger.v3.oas.annotations.security.SecurityScheme;
 		@SecurityRequirement(name = "bearerAuth") })
 @SecurityScheme(name = "bearerAuth", scheme = "bearer", type = SecuritySchemeType.HTTP, bearerFormat = "JWT")
 public class SecurityConfig {
-	
+
 	@Autowired
 	private JwtAuthenticationFilter jwtAuthFilter;
+	@Autowired
+	private CustomAuthenticationEntryPoint authenticationEntryPoint;
+	@Autowired
+	private CustomAccessDeniedHandler accessDeniedHandler;
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -46,7 +52,10 @@ public class SecurityConfig {
 		                .requestMatchers("/api/leave/pending","/api/leave/action/*").hasRole("MANAGER")
 		                .anyRequest().authenticated())
 				.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-				.sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+				.sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+				.exceptionHandling(ex -> ex
+						.authenticationEntryPoint(authenticationEntryPoint)
+						.accessDeniedHandler(accessDeniedHandler));
 
 		return http.build();
 	}
